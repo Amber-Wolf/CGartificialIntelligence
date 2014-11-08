@@ -8,18 +8,23 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	private final int MAX_DEPTH = 50;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
 	private int depthLimit;
-	protected ScoredClobberMove [] mvStack;
+	protected ScoredClobberMove[] mvStack;
 	
+	/**
+	 * Constructor
+	 * @param nname String name of player
+	 * @param deterministic
+	 */
 	public AlphaBetaClobberPlayer(String nname, boolean deterministic) {
 		super(nname, new ClobberState(), deterministic);
 	}
 	
 	/**
 	 * Performs an alpha-beta search
-	 * @param brd
-	 * @param currDepth
-	 * @param alpha
-	 * @param beta
+	 * @param brd Current game state
+	 * @param currDepth Current depth in search
+	 * @param alpha Alpha
+	 * @param beta Beta
 	 */
 	private void alphaBeta(ClobberState brd, int currDepth, double alpha, double beta) {
 		boolean toMaximize = (brd.getWho() == GameState.Who.HOME);
@@ -42,7 +47,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 			GameState.Who currTurn = brd.getWho();
 
 			// Get list of all possible moves and shuffle list
-			ArrayList<ClobberMove> moves = getPossibleMoves(brd, true);
+			ArrayList<ClobberMove> moves = getPossibleMoves(brd, ' ');
 			Collections.shuffle(moves);
 			
 			// Loop through each possible move
@@ -84,11 +89,23 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		}
 	}
 	
+	/**
+	 * Evaluate the current board state for either home or away
+	 * @param brd Current game state
+	 * @param who Player to evaluate board for
+	 * @return Score of who's board
+	 */
 	protected int eval(ClobberState brd, char who) {
+		// TODO: Develop evaluation function
 		int cnt = 0;
 		return cnt;
 	}
 	
+	/**
+	 * Evaluate the current board state
+	 * @param brd Current game state
+	 * @return Score of current game state
+	 */
 	protected int evalBoard(ClobberState brd) { 
 		int score = eval(brd, ClobberState.homeSym) - eval(brd, ClobberState.awaySym);
 		if (Math.abs(score) > MAX_SCORE) {
@@ -98,31 +115,13 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		return score;
 	}
 	
-	protected int possible(ClobberState brd, char who, int r, int c, int dr, int dc) {
-		int cnt = 0;
-		for (int i = 0; i < 4; i++) {
-			int row = r + dr * i;
-			int col = c + dc * i;
-			if (!Util.inrange(row, 0, ClobberState.ROWS-1) || !Util.inrange(col, 0, ClobberState.COLS-1)) {
-				return 0;
-			} else if (brd.board[row][col] == who) {
-				cnt++;
-			} else if (brd.board[row][col] == ClobberState.emptySym) {
-				;
-			} else {
-				return 0;
-			}
-		}
-		return cnt;
-	}
-	
 	/**
 	 * Determines if a board represents a completed game. If it is, the
 	 * evaluation values for these boards is recorded (i.e., 0 for a draw
 	 * +X, for a HOME win and -X for an AWAY win.
-	 * @param brd Connect4 board to be examined
-	 * @param mv where to place the score information; column is irrelevant
-	 * @return true if the brd is a terminal state
+	 * @param brd Current game state
+	 * @param mv Where to place the score information; only score is relevant
+	 * @return True if the brd is a terminal state
 	 */
 	protected boolean terminalValue(GameState brd, ScoredClobberMove mv) {
 		GameState.Status status = brd.getStatus();
@@ -151,12 +150,11 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	
 	/**
 	 * Get all possible moves for the current player
-	 * @param state Current Clobber game state
+	 * @param brd Current game state
 	 * @param who TODO: Allow for getting moves of either home or away player
 	 * @return List of all possible moves for current player
 	 */
-	protected ArrayList<ClobberMove> getPossibleMoves(ClobberState state, boolean who) {
-		ClobberState board = (ClobberState)state;
+	protected ArrayList<ClobberMove> getPossibleMoves(ClobberState brd, char who) {
 		ArrayList<ClobberMove> list = new ArrayList<ClobberMove>();  
 		ClobberMove mv = new ClobberMove();
 		for (int r = 0; r < ClobberState.ROWS; r++) {
@@ -164,19 +162,19 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 				mv.row1 = r;
 				mv.col1 = c;
 				mv.row2 = r-1; mv.col2 = c;
-				if (board.moveOK(mv)) {
+				if (brd.moveOK(mv)) {
 					list.add((ClobberMove)mv.clone());
 				}
 				mv.row2 = r+1; mv.col2 = c;
-				if (board.moveOK(mv)) {
+				if (brd.moveOK(mv)) {
 					list.add((ClobberMove)mv.clone());
 				}
 				mv.row2 = r; mv.col2 = c-1;
-				if (board.moveOK(mv)) {
+				if (brd.moveOK(mv)) {
 					list.add((ClobberMove)mv.clone());
 				}
 				mv.row2 = r; mv.col2 = c+1;
-				if (board.moveOK(mv)) {
+				if (brd.moveOK(mv)) {
 					list.add((ClobberMove)mv.clone());
 				}
 			}
@@ -184,15 +182,34 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		return list;
 	}
 	
-	// A ClobberMove with a score (how well it evaluates)
+	/**
+	 * A ClobberMove with a score (how well it evaluates)
+	 * @author Adam
+	 */
 	protected class ScoredClobberMove extends ClobberMove {
-		public double score;
+		private double score;
 
+		/**
+		 * Constructor
+		 * @param r1 Row of piece to move
+		 * @param c1 Column of piece to move
+		 * @param r2 Row of opponent piece to move to
+		 * @param c2 Column of opponent piece to move to
+		 * @param s Score of move
+		 */
 		public ScoredClobberMove(int r1, int c1, int r2, int c2, double s) {
 			super();
 			score = s;
 		}
 
+		/**
+		 * Setter
+		 * @param r1 Row of piece to move
+		 * @param c1 Column of piece to move
+		 * @param r2 Row of opponent piece to move to
+		 * @param c2 Column of opponent piece to move to
+		 * @param s Score of move
+		 */
 		public void set(int r1, int c1, int r2, int c2, double s) {
 			row1 = r1;
 			col1 = c1;
