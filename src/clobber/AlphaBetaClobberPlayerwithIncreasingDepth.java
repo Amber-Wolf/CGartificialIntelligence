@@ -42,8 +42,6 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 		boolean toMinimize = !toMaximize;
 
 		boolean isTerminal = terminalValue(brd, mvStack[currDepth]);
-		
-		// Create a function to change depth limit as game goes on
 
 		if (isTerminal) {
 			;
@@ -210,9 +208,11 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 	public GameMove getMove(GameState brd, String lastMove) { 
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);
-		depthLimit += 2;
+		if (brd.numMoves >= 0 && brd.numMoves <= 10) { depthLimit += 2; }
+		else { depthLimit -= 2; }
 		System.out.println("*****");
 		System.out.println(depthLimit);
+		System.out.println(brd.numMoves);
 		System.out.println("*****");
 		return mvStack[0];
 	}
