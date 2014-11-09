@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import game.*;
 
-public class AlphaBetaClobberPlayer extends GamePlayer {
+public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 	private final int MAX_DEPTH = 50;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
-	private int depthLimit;
+	private static int depthLimit;
 	protected ScoredClobberMove[] mvStack;
 	
 	/**
@@ -15,7 +15,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	 * @param nname String name of player
 	 * @param deterministic
 	 */
-	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d) {
+	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d) {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
 	}
@@ -42,6 +42,8 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		boolean toMinimize = !toMaximize;
 
 		boolean isTerminal = terminalValue(brd, mvStack[currDepth]);
+		
+		// Create a function to change depth limit as game goes on
 
 		if (isTerminal) {
 			;
@@ -104,6 +106,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	 * @param brd Current game state
 	 * @param who Player to evaluate board for
 	 * @return Score of who's board
+	 * TODO: move ordering
 	 */
 	protected int eval(ClobberState brd, char player) {
 		int cnt = 0;
@@ -207,13 +210,17 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	public GameMove getMove(GameState brd, String lastMove) { 
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);
+		depthLimit += 2;
+		System.out.println("*****");
+		System.out.println(depthLimit);
+		System.out.println("*****");
 		return mvStack[0];
 	}
 	
 	/**
 	 * Get all possible moves for the current player
 	 * @param brd Current game state
-	 * @param who TODO: Allow for getting moves of either home or away player
+	 * @param who
 	 * @return List of all possible moves for current player
 	 */
 	protected ArrayList<ClobberMove> getPossibleMoves(ClobberState brd, char who) {
@@ -282,8 +289,9 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	}
 	
 	public static void main(String [] args) {
-		int depth = 8;
-		GamePlayer p = new AlphaBetaClobberPlayer("C4 A-B F1 " + depth, true, depth);
+		int depth = 10;
+		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + depth, true, depth);
+		p.messageForOpponent("It's Clobberin' Time!");
 		p.compete(args);
 	}
 }
