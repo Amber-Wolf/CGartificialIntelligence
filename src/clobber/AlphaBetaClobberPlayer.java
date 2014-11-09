@@ -15,8 +15,19 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	 * @param nname String name of player
 	 * @param deterministic
 	 */
-	public AlphaBetaClobberPlayer(String nname, boolean deterministic) {
+	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d) {
 		super(nname, new ClobberState(), deterministic);
+		depthLimit = d;
+	}
+	
+	/**
+	 * Initializes move stack
+	 */
+	public void init() {
+		mvStack = new ScoredClobberMove[MAX_DEPTH];
+		for (int i = 0; i < MAX_DEPTH; i++) {
+			mvStack[i] = new ScoredClobberMove(0, 0, 0, 0, 0);
+		}
 	}
 	
 	/**
@@ -58,10 +69,9 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 
 				alphaBeta(brd, currDepth+1, alpha, beta);
 
-				// TODO: Undo move
-				//brd.numInCol[c]--;
-				//int row = brd.numInCol[c]; 
-				//brd.board[row][c] = ClobberState.emptySym;
+				// Undo move
+				brd.board[tempMv.row2][tempMv.col2] = (currTurn == GameState.Who.HOME ? ClobberState.awaySym : ClobberState.homeSym);
+				brd.board[tempMv.row1][tempMv.col1] = (currTurn == GameState.Who.HOME ? ClobberState.homeSym : ClobberState.awaySym);
 				brd.numMoves--;
 				brd.status = GameState.Status.GAME_ON;
 				brd.who = currTurn;
@@ -221,7 +231,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	
 	public static void main(String [] args) {
 		int depth = 8;
-		//GamePlayer p = new AlphaBetaClobberPlayer("C4 A-B F1 " + depth, depth);
-		//p.compete(args);
+		GamePlayer p = new AlphaBetaClobberPlayer("C4 A-B F1 " + depth, true, depth);
+		p.compete(args);
 	}
 }
