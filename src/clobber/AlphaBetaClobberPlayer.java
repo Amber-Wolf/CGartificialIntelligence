@@ -105,9 +105,31 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	 * @param who Player to evaluate board for
 	 * @return Score of who's board
 	 */
-	protected int eval(ClobberState brd, char who) {
-		// TODO: Develop evaluation function
+	protected int eval(ClobberState brd, char player) {
 		int cnt = 0;
+		ClobberMove mv = new ClobberMove();
+		for (int r = 0; r < ClobberState.ROWS; r++) {
+			for (int c = 0; c < ClobberState.COLS; c++) {
+				mv.row1 = r;
+				mv.col1 = c;
+				mv.row2 = r-1; mv.col2 = c;
+				if (valid(brd, mv, player)) {
+					cnt++;
+				}
+				mv.row2 = r+1; mv.col2 = c;
+				if (valid(brd, mv, player)) {
+					cnt++;
+				}
+				mv.row2 = r; mv.col2 = c-1;
+				if (valid(brd, mv, player)) {
+					cnt++;
+				}
+				mv.row2 = r; mv.col2 = c+1;
+				if (valid(brd, mv, player)) {
+					cnt++;
+				}
+			}
+		}
 		return cnt;
 	}
 	
@@ -116,13 +138,43 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	 * @param brd Current game state
 	 * @return Score of current game state
 	 */
-	protected int evalBoard(ClobberState brd) { 
-		int score = eval(brd, ClobberState.homeSym) - eval(brd, ClobberState.awaySym);
+	protected int evalBoard(ClobberState brd) {
+		int score = 0;
+		if (side == GameState.Who.HOME) {
+			score = eval(brd, ClobberState.homeSym) - eval(brd, ClobberState.awaySym);
+		}
+		else {
+			score = eval(brd, ClobberState.awaySym) - eval(brd, ClobberState.homeSym);
+		}
 		if (Math.abs(score) > MAX_SCORE) {
 			System.err.println("Problem with eval");
 			System.exit(0);
 		}
 		return score;
+	}
+	
+	/**
+	 * Determines whether a move is valid for a given player
+	 * @param brd Current game state
+	 * @param mv Clobber move to decide validity of
+	 * @param player Player making move
+	 * @return True if valid move
+	 */
+	public boolean valid(ClobberState brd, ClobberMove mv, char player) {
+		boolean OK = false;
+		char opp = (player == ClobberState.homeSym ? ClobberState.awaySym : ClobberState.homeSym);
+		int rowDiff = mv.row1 - mv.row2;
+		int colDiff = mv.col1 - mv.col2;
+		if (brd.status == GameState.Status.GAME_ON && mv != null &&
+			Util.inrange(mv.row1, 0, ClobberState.ROWS-1) && Util.inrange(mv.row2, 0, ClobberState.ROWS-1) &&
+			Util.inrange(mv.col1, 0, ClobberState.COLS-1) && Util.inrange(mv.col2, 0, ClobberState.COLS-1) &&
+			((Math.abs(rowDiff) == 1 && Math.abs(colDiff) == 0) || 
+			 (Math.abs(rowDiff) == 0 && Math.abs(colDiff) == 1)) && 
+			brd.board[mv.row1][mv.col1] == player &&
+			brd.board[mv.row2][mv.col2] == opp) {
+					OK = true;
+		}
+		return OK;
 	}
 	
 	/**
