@@ -2,12 +2,15 @@ package clobber;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
+
 import game.*;
 
-public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
-	private final int MAX_DEPTH = 50;
+public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*implements Runnable*/ {
+	private final int MAX_DEPTH = ClobberState.COLS*ClobberState.ROWS;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
 	private static int depthLimit;
+	private String difficulty;
 	protected ScoredClobberMove[] mvStack;
 	
 	/**
@@ -15,9 +18,10 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 	 * @param nname String name of player
 	 * @param deterministic
 	 */
-	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d) {
+	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d, String diff) {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
+		difficulty = diff;
 	}
 	
 	/**
@@ -78,9 +82,19 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 
 				// Check out the results, relative to what we've seen before
 				if (toMaximize && nextMove.score > bestMove.score) {
-					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					if (difficultyDecision(difficulty)) {
+						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					} else {
+						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
+						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
+					}
 				} else if (!toMaximize && nextMove.score < bestMove.score) {
-					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					if (difficultyDecision(difficulty)) {
+						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					} else {
+						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
+						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
+					}
 				}
 
 				// Update alpha and beta. Perform pruning, if possible.
@@ -104,7 +118,6 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 	 * @param brd Current game state
 	 * @param who Player to evaluate board for
 	 * @return Score of who's board
-	 * TODO: move ordering
 	 */
 	protected int eval(ClobberState brd, char player) {
 		int cnt = 0;
@@ -211,7 +224,9 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
 
-		depthLimit++;
+		if ((difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
+			depthLimit++;
+		}
 		
 		return mvStack[0];
 	}
@@ -287,9 +302,33 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 		}
 	}
 	
+	private boolean difficultyDecision(String diff) {
+		int random = (int)(Math.random() * 100);
+		
+		if (diff.equalsIgnoreCase("easy")) {
+			if (random > 25) {
+				return false;
+			}
+		} else if (diff.equalsIgnoreCase("medium")) {
+			if (random > 50) {
+				return false;
+			}
+		} else if (diff.equalsIgnoreCase("hard")) {
+			if (random > 75) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
 	public static void main(String [] args) {
 		int depth = 10;
-		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + depth, true, depth);
+		Scanner reader = new Scanner(System.in);
+		System.out.print("Difficulty? ");
+		String difficulty = reader.next();
+		reader.close();
+		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
 		p.messageForOpponent("It's Clobberin' Time!");
 		p.compete(args);
 	}
