@@ -205,15 +205,14 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer {
 	/**
 	 * Get the best evaluated move by performing an alpha-beta search
 	 */
-	public GameMove getMove(GameState brd, String lastMove) { 
+	public GameMove getMove(GameState brd, String lastMove) {
+		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
+		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		System.out.println(mvStack[0].score);
-		if (brd.numMoves >= 0 && brd.numMoves <= 10) { depthLimit += 2; }
-		else { depthLimit -= 2; }
-		System.out.println("*****");
-		System.out.println(depthLimit);
-		System.out.println(brd.numMoves);
-		System.out.println("*****");
+		System.out.println(mvStack[0].score);		
+
+		depthLimit++;
+		
 		return mvStack[0];
 	}
 	
