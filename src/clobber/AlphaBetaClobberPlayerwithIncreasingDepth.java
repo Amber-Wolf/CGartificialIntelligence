@@ -303,18 +303,18 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	}
 	
 	private boolean difficultyDecision(String diff) {
-		int random = (int)(Math.random() * 100);
+		double random = Math.random();
 		
 		if (diff.equalsIgnoreCase("easy")) {
-			if (random > 25) {
+			if (random > 0.25) {
 				return false;
 			}
 		} else if (diff.equalsIgnoreCase("medium")) {
-			if (random > 50) {
+			if (random > 0.50) {
 				return false;
 			}
 		} else if (diff.equalsIgnoreCase("hard")) {
-			if (random > 75) {
+			if (random > 0.75) {
 				return false;
 			}
 		}
@@ -325,8 +325,12 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	public static void main(String [] args) {
 		int depth = 10;
 		Scanner reader = new Scanner(System.in);
-		System.out.print("Difficulty? ");
-		String difficulty = reader.next();
+		String difficulty = "";
+		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
+				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
+			System.out.print("Difficulty? ");
+			difficulty = reader.next();
+		}
 		reader.close();
 		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
 		p.messageForOpponent("It's Clobberin' Time!");
