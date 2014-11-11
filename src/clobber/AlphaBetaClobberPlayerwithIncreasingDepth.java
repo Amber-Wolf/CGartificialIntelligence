@@ -1,5 +1,8 @@
 package clobber;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
@@ -11,17 +14,45 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	private final int MAX_SCORE = Integer.MAX_VALUE;
 	private static int depthLimit;
 	private String difficulty;
+	private ArrayList<String> col1;
+	private ArrayList<String> col2;
+	private ArrayList<String> col3;
 	protected ScoredClobberMove[] mvStack;
 	
 	/**
 	 * Constructor
 	 * @param nname String name of player
 	 * @param deterministic
+	 * @throws IOException 
 	 */
-	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d, String diff) {
+	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d, String diff) throws IOException {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
 		difficulty = diff;
+		
+		col1 = new ArrayList<String>();
+		BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
+		String line = null;
+		while ((line = col1Reader.readLine()) != null) {
+		    col1.add(line);
+		}
+		col1Reader.close();
+		
+		col2 = new ArrayList<String>();
+		BufferedReader col2Reader = new BufferedReader(new FileReader("col1.txt"));
+		line = null;
+		while ((line = col2Reader.readLine()) != null) {
+		    col2.add(line);
+		}
+		col2Reader.close();
+		
+		col3 = new ArrayList<String>();
+		BufferedReader col3Reader = new BufferedReader(new FileReader("col1.txt"));
+		line = null;
+		while ((line = col3Reader.readLine()) != null) {
+		    col3.add(line);
+		}
+		col3Reader.close();
 	}
 	
 	/**
@@ -221,6 +252,8 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	public GameMove getMove(GameState brd, String lastMove) {
 		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
 		
+		messageForOpponent(constructInsult(col1, col2, col3));
+		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
 
@@ -322,8 +355,19 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		return true;
 	}
 	
-	public static void main(String [] args) {
+	private String constructInsult(ArrayList<String> col1, ArrayList<String> col2, ArrayList<String> col3) {
+		int random = (int)(Math.random() * 50);
+		String insult = "Thou " + col1.get(random) + " ";
+		random = (int)(Math.random() * 50);
+		insult += col2.get(random) + " ";
+		random = (int)(Math.random() * 50);
+		insult += col3.get(random) + "!";
+		return insult;
+	}
+	
+	public static void main(String [] args) throws IOException {
 		int depth = 10;
+		
 		Scanner reader = new Scanner(System.in);
 		String difficulty = "";
 		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
@@ -332,6 +376,7 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 			difficulty = reader.next();
 		}
 		reader.close();
+		
 		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
 		p.messageForOpponent("It's Clobberin' Time!");
 		p.compete(args);
