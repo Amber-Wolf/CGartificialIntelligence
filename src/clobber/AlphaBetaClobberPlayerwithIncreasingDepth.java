@@ -14,6 +14,7 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	private final int MAX_SCORE = Integer.MAX_VALUE;
 	private static int depthLimit;
 	private String difficulty;
+	private static boolean insults;
 	private ArrayList<String> col1;
 	private ArrayList<String> col2;
 	private ArrayList<String> col3;
@@ -252,7 +253,7 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	public GameMove getMove(GameState brd, String lastMove) {
 		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
 		
-		messageForOpponent(constructInsult(col1, col2, col3));
+		if (insults) { messageForOpponent(constructInsult(col1, col2, col3)); }
 		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
@@ -368,14 +369,28 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	public static void main(String [] args) throws IOException {
 		int depth = 10;
 		
-		Scanner reader = new Scanner(System.in);
+		Scanner difficultyReader = new Scanner(System.in);
 		String difficulty = "";
 		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
 				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
 			System.out.print("Difficulty? ");
-			difficulty = reader.next();
+			difficulty = difficultyReader.next();
 		}
-		reader.close();
+		difficultyReader.close();
+		
+		Scanner insultReader = new Scanner(System.in);
+		String insultOpponent = "";
+		while (!(insultOpponent.equalsIgnoreCase("yes") || insultOpponent.equalsIgnoreCase("no"))) {
+			System.out.print("Insults? ");
+			insultOpponent = insultReader.next();
+			
+			if (insultOpponent.equalsIgnoreCase("yes")) {
+				insults = true;
+			} else {
+				insults = false;
+			}
+		}
+		insultReader.close();
 		
 		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
 		p.messageForOpponent("It's Clobberin' Time!");
