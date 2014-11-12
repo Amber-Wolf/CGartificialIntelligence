@@ -253,7 +253,9 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	public GameMove getMove(GameState brd, String lastMove) {
 		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
 		
-		if (insults) { messageForOpponent(constructInsult(col1, col2, col3)); }
+		if (insults) {
+			System.out.println(constructInsult(col1, col2, col3));
+		}
 		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
@@ -363,26 +365,27 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		insult += col2.get(random) + " ";
 		random = (int)(Math.random() * 50);
 		insult += col3.get(random) + "!";
-		return insult;
+		return insult.toUpperCase();
 	}
+	
+	@Override
+	public String messageForOpponent(String message) { return message; }
 	
 	public static void main(String [] args) throws IOException {
 		int depth = 10;
 		
-		Scanner difficultyReader = new Scanner(System.in);
+		Scanner reader = new Scanner(System.in);
 		String difficulty = "";
 		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
 				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
 			System.out.print("Difficulty? ");
-			difficulty = difficultyReader.next();
+			difficulty = reader.next();
 		}
-		difficultyReader.close();
 		
-		Scanner insultReader = new Scanner(System.in);
 		String insultOpponent = "";
 		while (!(insultOpponent.equalsIgnoreCase("yes") || insultOpponent.equalsIgnoreCase("no"))) {
 			System.out.print("Insults? ");
-			insultOpponent = insultReader.next();
+			insultOpponent = reader.next();
 			
 			if (insultOpponent.equalsIgnoreCase("yes")) {
 				insults = true;
@@ -390,10 +393,9 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 				insults = false;
 			}
 		}
-		insultReader.close();
+		reader.close();
 		
 		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
-		p.messageForOpponent("It's Clobberin' Time!");
 		p.compete(args);
 	}
 }
