@@ -1,4 +1,5 @@
 package clobber;
+import game.GameState;
 import game.Util;
 
 import java.awt.Point;
@@ -6,14 +7,14 @@ import java.util.ArrayList;
 
 public class EvalState {
 	
-	public static double PossMoves(ClobberState cs){
+	public static double possMoves(ClobberState cs){
 		int val = 0;
-		char board[][] = null;
-		Util.copy(cs.board, board);
+		char board[][] = cs.board;
+		//Util.copy(cs.board, board);
 		ClobberState temp = (ClobberState) cs.clone();
-		ArrayList<Point> homeLivePieces = new ArrayList();
-		ArrayList<Point> awayLivePieces = new ArrayList();
-		ArrayList<PieceGroup> groups = new ArrayList();
+		ArrayList<Point> homeLivePieces = new ArrayList<Point>();
+		ArrayList<Point> awayLivePieces = new ArrayList<Point>();
+		ArrayList<PieceGroup> groups = new ArrayList<PieceGroup>();
 		int x;
 		int y;
 		for(x = 0; x<cs.ROWS; x++){
@@ -31,6 +32,9 @@ public class EvalState {
 			}else{
 				value += pg.eval(awayLivePieces);
 			}
+		}
+		if(cs.who == GameState.Who.AWAY){
+			//value = -value;
 		}
 		return value;
 	}

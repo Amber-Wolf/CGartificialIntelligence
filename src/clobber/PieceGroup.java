@@ -18,6 +18,9 @@ public class PieceGroup {
 		Point p = new Point(x,y);
 		groupType = board[x][y];
 		this.cs = cs;
+		pieces = new ArrayList<Point>();
+		this.board = board;
+		recursiveAdd(x,y);
 	}
 	
 	private boolean checkSame(int x, int y){
@@ -83,8 +86,8 @@ public class PieceGroup {
 			}
 		}
 		value = value/counter;
-		if(value < 1f){
-			value = 1f;
+		if(value < 1f || (value == 1 && pieces.size() == 1)){
+			value = 0f;
 		}
 		return value;
 	}

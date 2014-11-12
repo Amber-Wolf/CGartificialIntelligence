@@ -46,7 +46,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		if (isTerminal) {
 			;
 		} else if (currDepth == depthLimit) {
-			mvStack[currDepth].set(0, 0, 0, 0, evalBoard(brd));
+			mvStack[currDepth].set(0, 0, 0, 0,evalBoard(brd)); //TODO
 		} else {
 			ScoredClobberMove tempMv = new ScoredClobberMove(0, 0, 0, 0, 0.0);
 
@@ -283,7 +283,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	
 	public static void main(String [] args) {
 		int depth = 8;
-		GamePlayer p = new AlphaBetaClobberPlayer("C4 A-B F1 " + depth, true, depth);
+		GamePlayer p = new AlphaBetaClobberPlayer("Clobber D" + depth, true, depth);
 		p.compete(args);
 	}
 }
