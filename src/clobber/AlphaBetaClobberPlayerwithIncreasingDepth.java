@@ -31,29 +31,31 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		depthLimit = d;
 		difficulty = diff;
 		
-		col1 = new ArrayList<String>();
-		BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
-		String line = null;
-		while ((line = col1Reader.readLine()) != null) {
-		    col1.add(line);
+		if (insults) {
+			col1 = new ArrayList<String>();
+			BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
+			String line = null;
+			while ((line = col1Reader.readLine()) != null) {
+			    col1.add(line);
+			}
+			col1Reader.close();
+			
+			col2 = new ArrayList<String>();
+			BufferedReader col2Reader = new BufferedReader(new FileReader("col2.txt"));
+			line = null;
+			while ((line = col2Reader.readLine()) != null) {
+			    col2.add(line);
+			}
+			col2Reader.close();
+			
+			col3 = new ArrayList<String>();
+			BufferedReader col3Reader = new BufferedReader(new FileReader("col3.txt"));
+			line = null;
+			while ((line = col3Reader.readLine()) != null) {
+			    col3.add(line);
+			}
+			col3Reader.close();
 		}
-		col1Reader.close();
-		
-		col2 = new ArrayList<String>();
-		BufferedReader col2Reader = new BufferedReader(new FileReader("col1.txt"));
-		line = null;
-		while ((line = col2Reader.readLine()) != null) {
-		    col2.add(line);
-		}
-		col2Reader.close();
-		
-		col3 = new ArrayList<String>();
-		BufferedReader col3Reader = new BufferedReader(new FileReader("col1.txt"));
-		line = null;
-		while ((line = col3Reader.readLine()) != null) {
-		    col3.add(line);
-		}
-		col3Reader.close();
 	}
 	
 	/**
@@ -367,9 +369,6 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		insult += col3.get(random) + "!";
 		return insult.toUpperCase();
 	}
-	
-	@Override
-	public String messageForOpponent(String message) { return message; }
 	
 	public static void main(String [] args) throws IOException {
 		int depth = 10;
