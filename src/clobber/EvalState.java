@@ -33,8 +33,34 @@ public class EvalState {
 				value += pg.eval(awayLivePieces);
 			}
 		}
-		if(cs.who == GameState.Who.AWAY){
-			//value = -value;
+		return value;
+	}
+	
+	public static double evalStateTwo(ClobberState cs){
+		int val = 0;
+		char board[][] = cs.board;
+		//Util.copy(cs.board, board);
+		ClobberState temp = (ClobberState) cs.clone();
+		ArrayList<Point> homeLivePieces = new ArrayList<Point>();
+		ArrayList<Point> awayLivePieces = new ArrayList<Point>();
+		ArrayList<PieceGroup> groups = new ArrayList<PieceGroup>();
+		int x;
+		int y;
+		for(x = 0; x<cs.ROWS; x++){
+			for(y = 0; y<cs.COLS; y++){
+				if(checkLive(cs,board,x,y)){
+					handleLivePiece(cs,board,x,y,groups,homeLivePieces,awayLivePieces);
+					PieceGroup pg = new PieceGroup(cs,board,x,y);
+				}
+			}
+		}
+		double value = 0;
+		for(PieceGroup pg : groups){
+			if(pg.getSide() == cs.awaySym){
+				value -= pg.evalTwo(homeLivePieces);
+			}else{
+				value += pg.evalTwo(awayLivePieces);
+			}
 		}
 		return value;
 	}

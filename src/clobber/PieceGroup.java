@@ -79,14 +79,38 @@ public class PieceGroup {
 	
 	public double eval(ArrayList<Point> livePieces){
 		double value = pieces.size();
-		int counter = 0;
+		double counter = 0;
 		for(Point p: livePieces){
 			if(withinOne(p)){
 				counter++;
 			}
 		}
+		if(counter == 0){
+			return 0;
+		}
 		value = value/counter;
 		if(value < 1f || (value == 1 && pieces.size() == 1)){
+			value = 0f;
+		}
+		return value;
+	}
+	
+	public double evalTwo(ArrayList<Point> livePieces){
+		double value = pieces.size();
+		double counter = 0;
+		for(Point p: livePieces){
+			if(withinOne(p)){
+				counter++;
+			}
+		}
+		if(counter == 0){
+			return 0;
+		}
+		value = value/counter;
+		if(value < 1f || (value == 1 && pieces.size() == 1)){
+			if(pieces.size() > 3){
+				return ((double)pieces.size())/3.0f;
+			}
 			value = 0f;
 		}
 		return value;
