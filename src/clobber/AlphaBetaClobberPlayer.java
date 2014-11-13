@@ -1,24 +1,27 @@
 package clobber;
 
+import game.GameMove;
+import game.GamePlayer;
+import game.GameState;
+import game.Util;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Scanner;
-
-import game.*;
 
 public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 	private final int MAX_DEPTH = ClobberState.COLS*ClobberState.ROWS;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
-	private static int depthLimit;
-	private String difficulty;
-	private static boolean insults;
-	private ArrayList<String> col1;
-	private ArrayList<String> col2;
-	private ArrayList<String> col3;
 	protected ScoredClobberMove[] mvStack;
+	private static int depthLimit;
+	private static String difficulty;
+	private static boolean insults;
+	private static ArrayList<String> col1;
+	private static ArrayList<String> col2;
+	private static ArrayList<String> col3;
+	private static String message;
 	
 	/**
 	 * Constructor
@@ -116,14 +119,14 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 
 				// Check out the results, relative to what we've seen before
 				if (toMaximize && nextMove.score > bestMove.score) {
-					if (difficultyDecision(difficulty)) {
+					if (difficultyDecision()) {
 						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
 					} else {
 						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
 						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
 					}
 				} else if (!toMaximize && nextMove.score < bestMove.score) {
-					if (difficultyDecision(difficulty)) {
+					if (difficultyDecision()) {
 						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
 					} else {
 						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
@@ -255,14 +258,10 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 	public GameMove getMove(GameState brd, String lastMove) {
 		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
 		
-		if (insults) {
-			System.out.println(constructInsult(col1, col2, col3));
-		}
-		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
 
-		if ((difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
+		if (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
 			depthLimit++;
 		}
 		
@@ -340,18 +339,22 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		}
 	}
 	
-	private boolean difficultyDecision(String diff) {
+	/**
+	 * Determines whether to make a good move based on player difficulty
+	 * @return True if good move, False if random move
+	 */
+	private boolean difficultyDecision() {
 		double random = Math.random();
 		
-		if (diff.equalsIgnoreCase("easy")) {
+		if (difficulty.equalsIgnoreCase("easy")) {
 			if (random > 0.25) {
 				return false;
 			}
-		} else if (diff.equalsIgnoreCase("medium")) {
+		} else if (difficulty.equalsIgnoreCase("medium")) {
 			if (random > 0.50) {
 				return false;
 			}
-		} else if (diff.equalsIgnoreCase("hard")) {
+		} else if (difficulty.equalsIgnoreCase("hard")) {
 			if (random > 0.75) {
 				return false;
 			}
@@ -360,7 +363,11 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		return true;
 	}
 	
-	private String constructInsult(ArrayList<String> col1, ArrayList<String> col2, ArrayList<String> col3) {
+	/**
+	 * Constructs a random insult
+	 * @return String insult
+	 */
+	private static String constructInsult() {
 		int random = (int)(Math.random() * 50);
 		String insult = "Thou " + col1.get(random) + " ";
 		random = (int)(Math.random() * 50);
@@ -370,17 +377,32 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		return insult.toUpperCase();
 	}
 	
+	/**
+	 * This is called to obtain the string this player wants to send
+	 * to its opponent.	This is called before getMessageFromOpponent
+	 * @return The string to be sent to the opponent
+	 * @param opponent Name of the opponent being played
+	 */
+	@Override
+	public String messageForOpponent(String opponent) { 
+		return message;
+	}
+	
 	public static void main(String [] args) throws IOException {
 		int depth = 10;
 		
+		// Hardcoded difficulty and insults values
+		difficulty = "clobber";
+		insults = true;
+		
+		/* Optionally let user manually enter difficulty and whether to insult
 		Scanner reader = new Scanner(System.in);
-		String difficulty = "";
+		difficulty = "";
 		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
 				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
 			System.out.print("Difficulty? ");
 			difficulty = reader.next();
 		}
-		
 		String insultOpponent = "";
 		while (!(insultOpponent.equalsIgnoreCase("yes") || insultOpponent.equalsIgnoreCase("no"))) {
 			System.out.print("Insults? ");
@@ -393,8 +415,10 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 			}
 		}
 		reader.close();
+		*/
 		
-		GamePlayer p = new AlphaBetaClobberPlayer("Clobber " + difficulty + " " + depth, true, depth, difficulty);
+		GamePlayer p = new AlphaBetaClobberPlayer("Cloborg " + depth, true, depth, difficulty);
+		if (insults) message = constructInsult();
 		p.compete(args);
 	}
 }
