@@ -1,23 +1,61 @@
 package clobber;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Scanner;
+
 import game.*;
 
-public class AlphaBetaClobberPlayer extends GamePlayer {
-	private final int MAX_DEPTH = 50;
+public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
+	private final int MAX_DEPTH = ClobberState.COLS*ClobberState.ROWS;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
-	private int depthLimit;
+	private static int depthLimit;
+	private String difficulty;
+	private static boolean insults;
+	private ArrayList<String> col1;
+	private ArrayList<String> col2;
+	private ArrayList<String> col3;
 	protected ScoredClobberMove[] mvStack;
 	
 	/**
 	 * Constructor
 	 * @param nname String name of player
 	 * @param deterministic
+	 * @throws IOException 
 	 */
-	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d) {
+	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d, String diff) throws IOException {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
+		difficulty = diff;
+		
+		if (insults) {
+			col1 = new ArrayList<String>();
+			BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
+			String line = null;
+			while ((line = col1Reader.readLine()) != null) {
+			    col1.add(line);
+			}
+			col1Reader.close();
+			
+			col2 = new ArrayList<String>();
+			BufferedReader col2Reader = new BufferedReader(new FileReader("col2.txt"));
+			line = null;
+			while ((line = col2Reader.readLine()) != null) {
+			    col2.add(line);
+			}
+			col2Reader.close();
+			
+			col3 = new ArrayList<String>();
+			BufferedReader col3Reader = new BufferedReader(new FileReader("col3.txt"));
+			line = null;
+			while ((line = col3Reader.readLine()) != null) {
+			    col3.add(line);
+			}
+			col3Reader.close();
+		}
 	}
 	
 	/**
@@ -78,9 +116,19 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 
 				// Check out the results, relative to what we've seen before
 				if (toMaximize && nextMove.score > bestMove.score) {
-					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					if (difficultyDecision(difficulty)) {
+						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					} else {
+						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
+						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
+					}
 				} else if (!toMaximize && nextMove.score < bestMove.score) {
-					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					if (difficultyDecision(difficulty)) {
+						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
+					} else {
+						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
+						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
+					}
 				}
 
 				// Update alpha and beta. Perform pruning, if possible.
@@ -204,16 +252,27 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 	/**
 	 * Get the best evaluated move by performing an alpha-beta search
 	 */
-	public GameMove getMove(GameState brd, String lastMove) { 
+	public GameMove getMove(GameState brd, String lastMove) {
+		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
+		
+		if (insults) {
+			System.out.println(constructInsult(col1, col2, col3));
+		}
+		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		System.out.println(mvStack[0].score);
+		System.out.println(mvStack[0].score);		
+
+		if ((difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
+			depthLimit++;
+		}
+		
 		return mvStack[0];
 	}
 	
 	/**
 	 * Get all possible moves for the current player
 	 * @param brd Current game state
-	 * @param who TODO: Allow for getting moves of either home or away player
+	 * @param who
 	 * @return List of all possible moves for current player
 	 */
 	protected ArrayList<ClobberMove> getPossibleMoves(ClobberState brd, char who) {
@@ -281,9 +340,61 @@ public class AlphaBetaClobberPlayer extends GamePlayer {
 		}
 	}
 	
-	public static void main(String [] args) {
-		int depth = 8;
-		GamePlayer p = new AlphaBetaClobberPlayer("C4 A-B F1 " + depth, true, depth);
+	private boolean difficultyDecision(String diff) {
+		double random = Math.random();
+		
+		if (diff.equalsIgnoreCase("easy")) {
+			if (random > 0.25) {
+				return false;
+			}
+		} else if (diff.equalsIgnoreCase("medium")) {
+			if (random > 0.50) {
+				return false;
+			}
+		} else if (diff.equalsIgnoreCase("hard")) {
+			if (random > 0.75) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	private String constructInsult(ArrayList<String> col1, ArrayList<String> col2, ArrayList<String> col3) {
+		int random = (int)(Math.random() * 50);
+		String insult = "Thou " + col1.get(random) + " ";
+		random = (int)(Math.random() * 50);
+		insult += col2.get(random) + " ";
+		random = (int)(Math.random() * 50);
+		insult += col3.get(random) + "!";
+		return insult.toUpperCase();
+	}
+	
+	public static void main(String [] args) throws IOException {
+		int depth = 10;
+		
+		Scanner reader = new Scanner(System.in);
+		String difficulty = "";
+		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
+				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
+			System.out.print("Difficulty? ");
+			difficulty = reader.next();
+		}
+		
+		String insultOpponent = "";
+		while (!(insultOpponent.equalsIgnoreCase("yes") || insultOpponent.equalsIgnoreCase("no"))) {
+			System.out.print("Insults? ");
+			insultOpponent = reader.next();
+			
+			if (insultOpponent.equalsIgnoreCase("yes")) {
+				insults = true;
+			} else {
+				insults = false;
+			}
+		}
+		reader.close();
+		
+		GamePlayer p = new AlphaBetaClobberPlayer("Clobber " + difficulty + " " + depth, true, depth, difficulty);
 		p.compete(args);
 	}
 }
