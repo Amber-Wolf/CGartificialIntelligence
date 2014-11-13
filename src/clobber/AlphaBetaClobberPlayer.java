@@ -26,14 +26,15 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 	/**
 	 * Constructor
 	 * @param nname String name of player
-	 * @param deterministic
+	 * @param deterministic Deterministic player
+	 * @param d Depth limit for alpha-beta search
 	 * @throws IOException 
 	 */
-	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d, String diff) throws IOException {
+	public AlphaBetaClobberPlayer(String nname, boolean deterministic, int d) throws IOException {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
-		difficulty = diff;
 		
+		// Reads insult files into arraylists
 		if (insults) {
 			col1 = new ArrayList<String>();
 			BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
@@ -417,7 +418,7 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		reader.close();
 		*/
 		
-		GamePlayer p = new AlphaBetaClobberPlayer("Cloborg " + depth, true, depth, difficulty);
+		GamePlayer p = new AlphaBetaClobberPlayer("Cloborg " + depth, true, depth);
 		if (insults) message = constructInsult();
 		p.compete(args);
 	}
