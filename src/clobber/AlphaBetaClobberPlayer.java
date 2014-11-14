@@ -340,11 +340,6 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		}
 	}
 	
-<<<<<<< HEAD
-	public static void main(String [] args) {
-		int depth = 8;
-		GamePlayer p = new AlphaBetaClobberPlayer("Clobber D" + depth, true, depth);
-=======
 	/**
 	 * Determines whether to make a good move based on player difficulty
 	 * @return True if good move, False if random move
@@ -425,7 +420,6 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		
 		GamePlayer p = new AlphaBetaClobberPlayer("Cloborg " + depth, true, depth);
 		if (insults) message = constructInsult();
->>>>>>> a1403db6e40867954672ca0e37aa4eb6b7688537
 		p.compete(args);
 	}
 }
