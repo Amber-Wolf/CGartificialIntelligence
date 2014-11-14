@@ -257,13 +257,13 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 	 * Get the best evaluated move by performing an alpha-beta search
 	 */
 	public GameMove getMove(GameState brd, String lastMove) {
-		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
+		if (brd.numMoves <= 1) { depthLimit = 5; }
 		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
 
 		if (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
-			depthLimit++;
+			depthLimit += 3;
 		}
 		
 		return mvStack[0];
@@ -340,11 +340,6 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		}
 	}
 	
-<<<<<<< HEAD
-	public static void main(String [] args) {
-		int depth = 8;
-		GamePlayer p = new AlphaBetaClobberPlayer("Clobber D" + depth, true, depth);
-=======
 	/**
 	 * Determines whether to make a good move based on player difficulty
 	 * @return True if good move, False if random move
@@ -425,7 +420,6 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 		
 		GamePlayer p = new AlphaBetaClobberPlayer("Cloborg " + depth, true, depth);
 		if (insults) message = constructInsult();
->>>>>>> a1403db6e40867954672ca0e37aa4eb6b7688537
 		p.compete(args);
 	}
 }
