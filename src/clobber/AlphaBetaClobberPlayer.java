@@ -257,13 +257,13 @@ public class AlphaBetaClobberPlayer extends GamePlayer /*implements Runnable*/ {
 	 * Get the best evaluated move by performing an alpha-beta search
 	 */
 	public GameMove getMove(GameState brd, String lastMove) {
-		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
+		if (brd.numMoves <= 1) { depthLimit = 5; }
 		
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		System.out.println(mvStack[0].score);		
 
 		if (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
-			depthLimit++;
+			depthLimit += 3;
 		}
 		
 		return mvStack[0];
