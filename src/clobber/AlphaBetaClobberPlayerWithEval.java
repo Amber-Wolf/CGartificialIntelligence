@@ -231,7 +231,7 @@ public class AlphaBetaClobberPlayerWithEval extends GamePlayer {
 	
 	public static void main(String [] args) {
 		int depth = 4;
-		GamePlayer p = new AlphaBetaClobberPlayerWithEval("Eval D" + depth, true, depth);
+		GamePlayer p = new AlphaBetaClobberPlayerWithEval("Eval D" + depth, false, depth);
 		p.compete(args);
 		
 		/*

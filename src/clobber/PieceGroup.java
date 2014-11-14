@@ -98,19 +98,38 @@ public class PieceGroup {
 	public double evalTwo(ArrayList<Point> livePieces){
 		double value = pieces.size();
 		double counter = 0;
+		Point temp = null;
 		for(Point p: livePieces){
 			if(withinOne(p)){
 				counter++;
+				temp = p;
 			}
 		}
 		if(counter == 0){
 			return 0;
-		}
-		value = value/counter;
-		if(value < 1f || (value == 1 && pieces.size() == 1)){
-			if(pieces.size() > 3){
-				return ((double)pieces.size())/3.0f;
+		}else if(counter == 1){
+			int counter2 = 0;
+			if(checkSame(temp.x,temp.y + 1)){
+				counter2++;
 			}
+			if(checkSame(temp.x,temp.y - 1)){
+				counter2++;
+			}
+			if(checkSame(temp.x + 1,temp.y)){
+				counter2++;
+			}
+			if(checkSame(temp.x - 1,temp.y)){
+				counter2++;
+			}
+			if(counter2 != 0){
+				value = value/counter2;
+			}else{
+				return 0;
+			}
+		}else{
+			value = value/(counter + 1);
+		}
+		if(value < 1.1f || (value == 1 && pieces.size() == 1)){
 			value = 0f;
 		}
 		return value;
