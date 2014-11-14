@@ -1,59 +1,25 @@
 package clobber;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Scanner;
 
+import clobber.AlphaBetaClobberPlayer.ScoredClobberMove;
 import game.*;
 
-public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*implements Runnable*/ {
-	private final int MAX_DEPTH = ClobberState.COLS*ClobberState.ROWS;
+public class AlphaBetaClobberPlayerWithEval extends GamePlayer {
+	private final int MAX_DEPTH = 50;
 	private final int MAX_SCORE = Integer.MAX_VALUE;
-	private static int depthLimit;
-	private String difficulty;
-	private static boolean insults;
-	private ArrayList<String> col1;
-	private ArrayList<String> col2;
-	private ArrayList<String> col3;
+	private int depthLimit;
 	protected ScoredClobberMove[] mvStack;
 	
 	/**
 	 * Constructor
 	 * @param nname String name of player
 	 * @param deterministic
-	 * @throws IOException 
 	 */
-	public AlphaBetaClobberPlayerwithIncreasingDepth(String nname, boolean deterministic, int d, String diff) throws IOException {
+	public AlphaBetaClobberPlayerWithEval(String nname, boolean deterministic, int d) {
 		super(nname, new ClobberState(), deterministic);
 		depthLimit = d;
-		difficulty = diff;
-		
-		col1 = new ArrayList<String>();
-		BufferedReader col1Reader = new BufferedReader(new FileReader("col1.txt"));
-		String line = null;
-		while ((line = col1Reader.readLine()) != null) {
-		    col1.add(line);
-		}
-		col1Reader.close();
-		
-		col2 = new ArrayList<String>();
-		BufferedReader col2Reader = new BufferedReader(new FileReader("col1.txt"));
-		line = null;
-		while ((line = col2Reader.readLine()) != null) {
-		    col2.add(line);
-		}
-		col2Reader.close();
-		
-		col3 = new ArrayList<String>();
-		BufferedReader col3Reader = new BufferedReader(new FileReader("col1.txt"));
-		line = null;
-		while ((line = col3Reader.readLine()) != null) {
-		    col3.add(line);
-		}
-		col3Reader.close();
 	}
 	
 	/**
@@ -82,7 +48,7 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		if (isTerminal) {
 			;
 		} else if (currDepth == depthLimit) {
-			mvStack[currDepth].set(0, 0, 0, 0, evalBoard(brd));
+			mvStack[currDepth].set(0, 0, 0, 0, /*evalBoard(brd)*/EvalState.possMoves(brd)); //TODO // EvalState.possMoves(brd)
 		} else {
 			ScoredClobberMove tempMv = new ScoredClobberMove(0, 0, 0, 0, 0.0);
 
@@ -114,19 +80,9 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 
 				// Check out the results, relative to what we've seen before
 				if (toMaximize && nextMove.score > bestMove.score) {
-					if (difficultyDecision(difficulty)) {
-						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
-					} else {
-						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
-						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
-					}
+					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
 				} else if (!toMaximize && nextMove.score < bestMove.score) {
-					if (difficultyDecision(difficulty)) {
-						bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
-					} else {
-						ClobberMove moveMade = moves.get((int)(Math.random() * moves.size()));
-						bestMove.set(moveMade.row1, moveMade.col1, moveMade.row2, moveMade.col2, 0);
-					}
+					bestMove.set(move.row1, move.col1, move.row2, move.col2, nextMove.score);
 				}
 
 				// Update alpha and beta. Perform pruning, if possible.
@@ -143,60 +99,6 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Evaluate the current board state for either home or away
-	 * @param brd Current game state
-	 * @param who Player to evaluate board for
-	 * @return Score of who's board
-	 */
-	protected int eval(ClobberState brd, char player) {
-		int cnt = 0;
-		ClobberMove mv = new ClobberMove();
-		for (int r = 0; r < ClobberState.ROWS; r++) {
-			for (int c = 0; c < ClobberState.COLS; c++) {
-				mv.row1 = r;
-				mv.col1 = c;
-				mv.row2 = r-1; mv.col2 = c;
-				if (valid(brd, mv, player)) {
-					cnt++;
-				}
-				mv.row2 = r+1; mv.col2 = c;
-				if (valid(brd, mv, player)) {
-					cnt++;
-				}
-				mv.row2 = r; mv.col2 = c-1;
-				if (valid(brd, mv, player)) {
-					cnt++;
-				}
-				mv.row2 = r; mv.col2 = c+1;
-				if (valid(brd, mv, player)) {
-					cnt++;
-				}
-			}
-		}
-		return cnt;
-	}
-	
-	/**
-	 * Evaluate the current board state
-	 * @param brd Current game state
-	 * @return Score of current game state
-	 */
-	protected int evalBoard(ClobberState brd) {
-		int score = 0;
-		if (side == GameState.Who.HOME) {
-			score = eval(brd, ClobberState.homeSym) - eval(brd, ClobberState.awaySym);
-		}
-		else {
-			score = eval(brd, ClobberState.awaySym) - eval(brd, ClobberState.homeSym);
-		}
-		if (Math.abs(score) > MAX_SCORE) {
-			System.err.println("Problem with eval");
-			System.exit(0);
-		}
-		return score;
 	}
 	
 	/**
@@ -250,25 +152,16 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 	/**
 	 * Get the best evaluated move by performing an alpha-beta search
 	 */
-	public GameMove getMove(GameState brd, String lastMove) {
-		if (brd.numMoves == 0 || brd.numMoves == 1) { depthLimit = 10; }
-		
-		if (insults) { messageForOpponent(constructInsult(col1, col2, col3)); }
-		
+	public GameMove getMove(GameState brd, String lastMove) { 
 		alphaBeta((ClobberState)brd, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		System.out.println(mvStack[0].score);		
-
-		if ((difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") || difficulty.equalsIgnoreCase("hard"))) {
-			depthLimit++;
-		}
-		
+		System.out.println(mvStack[0].score);
 		return mvStack[0];
 	}
 	
 	/**
 	 * Get all possible moves for the current player
 	 * @param brd Current game state
-	 * @param who
+	 * @param who TODO: Allow for getting moves of either home or away player
 	 * @return List of all possible moves for current player
 	 */
 	protected ArrayList<ClobberMove> getPossibleMoves(ClobberState brd, char who) {
@@ -336,64 +229,25 @@ public class AlphaBetaClobberPlayerwithIncreasingDepth extends GamePlayer /*impl
 		}
 	}
 	
-	private boolean difficultyDecision(String diff) {
-		double random = Math.random();
-		
-		if (diff.equalsIgnoreCase("easy")) {
-			if (random > 0.25) {
-				return false;
-			}
-		} else if (diff.equalsIgnoreCase("medium")) {
-			if (random > 0.50) {
-				return false;
-			}
-		} else if (diff.equalsIgnoreCase("hard")) {
-			if (random > 0.75) {
-				return false;
-			}
-		}
-		
-		return true;
-	}
-	
-	private String constructInsult(ArrayList<String> col1, ArrayList<String> col2, ArrayList<String> col3) {
-		int random = (int)(Math.random() * 50);
-		String insult = "Thou " + col1.get(random) + " ";
-		random = (int)(Math.random() * 50);
-		insult += col2.get(random) + " ";
-		random = (int)(Math.random() * 50);
-		insult += col3.get(random) + "!";
-		return insult;
-	}
-	
-	public static void main(String [] args) throws IOException {
-		int depth = 10;
-		
-		Scanner difficultyReader = new Scanner(System.in);
-		String difficulty = "";
-		while (!(difficulty.equalsIgnoreCase("easy") || difficulty.equalsIgnoreCase("medium") ||
-				difficulty.equalsIgnoreCase("hard") || difficulty.equalsIgnoreCase("clobber"))) {
-			System.out.print("Difficulty? ");
-			difficulty = difficultyReader.next();
-		}
-		difficultyReader.close();
-		
-		Scanner insultReader = new Scanner(System.in);
-		String insultOpponent = "";
-		while (!(insultOpponent.equalsIgnoreCase("yes") || insultOpponent.equalsIgnoreCase("no"))) {
-			System.out.print("Insults? ");
-			insultOpponent = insultReader.next();
-			
-			if (insultOpponent.equalsIgnoreCase("yes")) {
-				insults = true;
-			} else {
-				insults = false;
-			}
-		}
-		insultReader.close();
-		
-		GamePlayer p = new AlphaBetaClobberPlayerwithIncreasingDepth("Clobber " + difficulty + " " + depth, true, depth, difficulty);
-		p.messageForOpponent("It's Clobberin' Time!");
+	public static void main(String [] args) {
+		int depth = 4;
+		GamePlayer p = new AlphaBetaClobberPlayerWithEval("Eval D" + depth, true, depth);
 		p.compete(args);
+		
+		/*
+		p.init();
+		Connect4State state = new Connect4State();
+		state.makeMove(new Connect4Move(3));
+		state.makeMove(new Connect4Move(4));
+		state.makeMove(new Connect4Move(4));
+		state.makeMove(new Connect4Move(5));
+		GameMove mv = p.getMove(state, "");
+		System.out.println("Original board");
+		System.out.println(state.toString());
+		System.out.println("Move: " + mv.toString());
+		System.out.println("Board after move");
+		state.makeMove(mv);
+		System.out.println(state.toString());
+		 */
 	}
 }
