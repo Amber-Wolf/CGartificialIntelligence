@@ -107,6 +107,24 @@ public class PieceGroup {
 		}
 		if(counter == 0){
 			return 0;
+		}else{
+			return value;
+		}
+	}
+	
+	
+	/*public double evalTwo(ArrayList<Point> livePieces){
+		double value = pieces.size();
+		double counter = 0;
+		Point temp = null;
+		for(Point p: livePieces){
+			if(withinOne(p)){
+				counter++;
+				temp = p;
+			}
+		}
+		if(counter == 0){
+			return 0;
 		}else if(counter == 1){
 			int counter2 = 0;
 			if(checkSame(temp.x,temp.y + 1)){
@@ -133,7 +151,7 @@ public class PieceGroup {
 			value = 0f;
 		}
 		return value;
-	}
+	}*/
 }
 	
 	
